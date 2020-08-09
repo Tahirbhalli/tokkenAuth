@@ -1,13 +1,20 @@
 class Api::UsersController < Api::BaseController
     def index
-        user = User.find(1)
-        render json: {
-            jwt: encode_tokken({userid: user.id,name: user.username})
-        }
+        header = request.headers['Authorization']
+        header = header.split(' ').last if header
+        #byebug
+        begin
+            @decoded = decode_tokken(header)
+            @current_user = User.find(@decoded[:userid])
+        end
+        # user = User.find(1)
+        # @jsonwebtokken = encode_tokken({userid: user.id,name: user.username})
+        # # render json: {
+        # #     jwt: encode_tokken()
+        # # }
     end
     def create
         user = User.new(params.permit(:username,:password))
-        byebug
         if user.save
             render json: {
                 jwt: encode_tokken({userid: user.id,name: user.username})
